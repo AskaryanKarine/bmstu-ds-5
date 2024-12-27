@@ -10,6 +10,7 @@ type Config struct {
 	LoyaltyService     string `env:"LOYALTY_SERVICE"`
 	PaymentService     string `env:"PAYMENT_SERVICE"`
 	ReservationService string `env:"RESERVATION_SERVICE"`
+	JWKsURl            string `env:"JWK_URL"`
 }
 
 func NewConfig() (Config, error) {

@@ -11,8 +11,8 @@ type loyaltyClient interface {
 }
 
 type reservationClient interface {
-	GetHotels(page, size int) (models.PaginationResponse, error)
-	GetHotelByUUID(uuid string) (models.HotelResponse, error)
+	GetHotels(page, size int, token string) (models.PaginationResponse, error)
+	GetHotelByUUID(uuid, token string) (models.HotelResponse, error)
 	GetReservationByUUID(username, uuid string) (models.ExtendedReservationResponse, error)
 	GetReservationsByUser(username string) ([]models.ExtendedReservationResponse, error)
 	CancelReservation(username, uuid string) error
@@ -20,7 +20,7 @@ type reservationClient interface {
 }
 
 type paymentClient interface {
-	GetByUUID(uuid string) (models.PaymentInfo, error)
-	Cancel(uuid string) error
-	CreatePayment(payment models.PaymentCreateRequest) (models.ExtendedPaymentInfo, error)
+	GetByUUID(uuid, token string) (models.PaymentInfo, error)
+	Cancel(uuid, token string) error
+	CreatePayment(payment models.PaymentCreateRequest, token string) (models.ExtendedPaymentInfo, error)
 }

@@ -21,12 +21,14 @@ func NewPaymentClient(client httpClient, baseUrl string) *PaymentClient {
 	}
 }
 
-func (p *PaymentClient) GetByUUID(uuid string) (models.PaymentInfo, error) {
+func (p *PaymentClient) GetByUUID(uuid, token string) (models.PaymentInfo, error) {
 	urlReq := fmt.Sprintf("%s/%s/%s", p.baseUrl, "payments", uuid)
 	req, err := http.NewRequest(http.MethodGet, urlReq, nil)
 	if err != nil {
 		return models.PaymentInfo{}, fmt.Errorf("failed to build request: %w", err)
 	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := p.client.Do(req)
 	if err != nil {
@@ -65,12 +67,15 @@ func (p *PaymentClient) GetByUUID(uuid string) (models.PaymentInfo, error) {
 	}
 }
 
-func (p *PaymentClient) Cancel(uuid string) error {
+func (p *PaymentClient) Cancel(uuid, token string) error {
 	urlReq := fmt.Sprintf("%s/%s/%s", p.baseUrl, "reservations", uuid)
 	req, err := http.NewRequest(http.MethodDelete, urlReq, nil)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
 	resp, err := p.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to make request: %w", err)
@@ -102,7 +107,7 @@ func (p *PaymentClient) Cancel(uuid string) error {
 
 }
 
-func (p *PaymentClient) CreatePayment(payment models.PaymentCreateRequest) (models.ExtendedPaymentInfo, error) {
+func (p *PaymentClient) CreatePayment(payment models.PaymentCreateRequest, token string) (models.ExtendedPaymentInfo, error) {
 	urlReq := fmt.Sprintf("%s/%s", p.baseUrl, "payments")
 	reqBody, err := json.Marshal(payment)
 	if err != nil {
@@ -113,6 +118,7 @@ func (p *PaymentClient) CreatePayment(payment models.PaymentCreateRequest) (mode
 		return models.ExtendedPaymentInfo{}, fmt.Errorf("failed to build request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := p.client.Do(req)
 	if err != nil {

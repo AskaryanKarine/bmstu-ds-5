@@ -9,6 +9,10 @@ import (
 )
 
 func (s *Server) getHotels(c echo.Context) error {
+	token, ok := c.Get("token").(string)
+	if !ok {
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get token"})
+	}
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "page must be integer"})
@@ -17,7 +21,7 @@ func (s *Server) getHotels(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "size must be integer"})
 	}
-	resp, err := s.reservation.GetHotels(page, size)
+	resp, err := s.reservation.GetHotels(page, size, token)
 	if err != nil {
 		return processError(c, err)
 	}
@@ -25,18 +29,18 @@ func (s *Server) getHotels(c echo.Context) error {
 }
 
 func (s *Server) getReservations(c echo.Context) error {
-	username, ok := c.Get("username").(string)
+	token, ok := c.Get("token").(string)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get username"})
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get token"})
 	}
 
-	reservationsByUser, err := s.reservation.GetReservationsByUser(username)
+	reservationsByUser, err := s.reservation.GetReservationsByUser(token)
 	if err != nil {
 		return processError(c, err)
 	}
 	reservationsResp := make([]models.ReservationResponse, 0, len(reservationsByUser))
 	for i := range reservationsByUser {
-		paymentInfo, err := s.payment.GetByUUID(reservationsByUser[i].PaymentUID)
+		paymentInfo, err := s.payment.GetByUUID(reservationsByUser[i].PaymentUID, token)
 		if err != nil {
 			return processError(c, err)
 		}
@@ -56,17 +60,17 @@ func (s *Server) getReservationsByUID(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
 	}
 
-	username, ok := c.Get("username").(string)
+	token, ok := c.Get("token").(string)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get username"})
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get token"})
 	}
 
-	reservationsByUser, err := s.reservation.GetReservationByUUID(username, uid)
+	reservationsByUser, err := s.reservation.GetReservationByUUID(token, uid)
 	if err != nil {
 		return processError(c, err)
 	}
 
-	paymentInfo, err := s.payment.GetByUUID(reservationsByUser.PaymentUID)
+	paymentInfo, err := s.payment.GetByUUID(reservationsByUser.PaymentUID, token)
 	if err != nil {
 		return processError(c, err)
 	}
@@ -83,27 +87,27 @@ func (s *Server) canceledReservation(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: err.Error()})
 	}
 
-	username, ok := c.Get("username").(string)
+	token, ok := c.Get("token").(string)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get username"})
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get token"})
 	}
 
-	err = s.reservation.CancelReservation(username, uid)
+	err = s.reservation.CancelReservation(token, uid)
 	if err != nil {
 		return processError(c, err)
 	}
 
-	reservations, err := s.reservation.GetReservationByUUID(username, uid)
+	reservations, err := s.reservation.GetReservationByUUID(token, uid)
 	if err != nil {
 		return processError(c, err)
 	}
 
-	err = s.payment.Cancel(reservations.PaymentUID)
+	err = s.payment.Cancel(reservations.PaymentUID, token)
 	if err != nil {
 		return processError(c, err)
 	}
 
-	err = s.loyalty.DecreaseLoyalty(username)
+	err = s.loyalty.DecreaseLoyalty(token)
 	if err != nil {
 		return processError(c, err)
 	}
@@ -112,9 +116,9 @@ func (s *Server) canceledReservation(c echo.Context) error {
 }
 
 func (s *Server) createReservation(c echo.Context) error {
-	username, ok := c.Get("username").(string)
+	token, ok := c.Get("token").(string)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get username"})
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get token"})
 	}
 
 	var body models.CreateReservationRequest
@@ -126,12 +130,12 @@ func (s *Server) createReservation(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, validation.ConvertToError(err, "failed to validate body request"))
 	}
 
-	hotelInfo, err := s.reservation.GetHotelByUUID(body.HotelUid) // отсюда только price
+	hotelInfo, err := s.reservation.GetHotelByUUID(body.HotelUid, token) // отсюда только price
 	if err != nil {
 		return processError(c, err)
 	}
 
-	loyalty, err := s.loyalty.GetLoyaltyByUser(username) // отсюда только discount
+	loyalty, err := s.loyalty.GetLoyaltyByUser(token) // отсюда только discount
 	if err != nil {
 		return processError(c, err)
 	}
@@ -142,13 +146,13 @@ func (s *Server) createReservation(c echo.Context) error {
 		Discount:  loyalty.Discount,
 		StartDate: body.StartDate,
 		EndDate:   body.EndDate,
-	})
+	}, token)
 
 	if err != nil {
 		return processError(c, err)
 	}
 
-	err = s.loyalty.IncreaseLoyalty(username)
+	err = s.loyalty.IncreaseLoyalty(token)
 	if err != nil {
 		return processError(c, err)
 	}
@@ -156,13 +160,13 @@ func (s *Server) createReservation(c echo.Context) error {
 	reservationUid, err := s.reservation.CreateReservation(models.ExtendedCreateReservationResponse{
 		CreateReservationRequest: body,
 		PaymentUid:               extendedPaymentInfo.PaymentUid,
-	}, username)
+	}, token)
 
 	if err != nil {
 		return processError(c, err)
 	}
 
-	reservation, err := s.reservation.GetReservationByUUID(username, reservationUid)
+	reservation, err := s.reservation.GetReservationByUUID(token, reservationUid)
 	if err != nil {
 		return processError(c, err)
 	}

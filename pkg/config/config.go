@@ -8,6 +8,7 @@ type Config struct {
 	AppEnv      string `env:"APP_ENV" env-default:"test"`
 	PostgresDSN string `env:"POSTGRES_DSN"`
 	Port        int    `env:"PORT" env-default:"8080"`
+	JWKsURl     string `env:"JWK_URL"`
 }
 
 func ReadConfig(localPath string) (Config, error) {

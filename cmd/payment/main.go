@@ -22,7 +22,7 @@ func main() {
 	}
 
 	pr := postgres2.NewPaymentStorage(db)
-	s := server.NewServer(pr)
+	s := server.NewServer(pr, cfg)
 
 	s.Run(cfg.Port)
 }

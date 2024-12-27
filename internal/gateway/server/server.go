@@ -42,19 +42,19 @@ func NewServer(cfg config.Config) *Server {
 	app.SetStandardSetting(e)
 	app.AddHealthCheck(e)
 
-	api := s.echo.Group("/api/v1")
+	api := s.echo.Group("/api/v1", app.GetUsernameMW(s.cfg.JWKsURl))
 
 	api.GET("/hotels", s.getHotels)
 
-	api.GET("/me", s.getUserInfo, app.GetUsernameMW())
+	api.GET("/me", s.getUserInfo)
 
-	reservations := api.Group("/reservations", app.GetUsernameMW())
-	reservations.GET("", s.getReservations, app.GetUsernameMW())
-	reservations.POST("", s.createReservation, app.GetUsernameMW())
-	reservations.GET("/:uid", s.getReservationsByUID, app.GetUsernameMW())
-	reservations.DELETE("/:uid", s.canceledReservation, app.GetUsernameMW())
+	reservations := api.Group("/reservations")
+	reservations.GET("", s.getReservations)
+	reservations.POST("", s.createReservation)
+	reservations.GET("/:uid", s.getReservationsByUID)
+	reservations.DELETE("/:uid", s.canceledReservation)
 
-	api.GET("/loyalty", s.getLoyalty, app.GetUsernameMW())
+	api.GET("/loyalty", s.getLoyalty)
 
 	return s
 }

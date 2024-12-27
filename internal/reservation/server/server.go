@@ -4,6 +4,7 @@ import (
 	"context"
 	innermodels "github.com/AskaryanKarine/bmstu-ds-4/internal/reservation/models"
 	"github.com/AskaryanKarine/bmstu-ds-4/pkg/app"
+	"github.com/AskaryanKarine/bmstu-ds-4/pkg/config"
 	"github.com/AskaryanKarine/bmstu-ds-4/pkg/models"
 	"github.com/labstack/echo/v4"
 )
@@ -27,7 +28,7 @@ type reservationStorage interface {
 	Create(ctx context.Context, reservation models.ExtendedCreateReservationResponse, username string) (string, error)
 }
 
-func New(hs hotelStorage, rs reservationStorage) *Server {
+func New(hs hotelStorage, rs reservationStorage, cfg config.Config) *Server {
 	e := echo.New()
 	s := &Server{
 		echo: e,
@@ -38,16 +39,16 @@ func New(hs hotelStorage, rs reservationStorage) *Server {
 	app.SetStandardSetting(e)
 	app.AddHealthCheck(e)
 
-	api := s.echo.Group("/api/v1")
+	api := s.echo.Group("/api/v1", app.GetUsernameMW(cfg.JWKsURl))
 
 	api.GET("/hotels", s.getAllHotels)
 	api.GET("/hotels/:uid", s.getHotelByUID)
 
 	reservations := api.Group("/reservations")
-	reservations.GET("", s.getAllReservationsByUser, app.GetUsernameMW())
-	reservations.POST("", s.createReservation, app.GetUsernameMW())
-	reservations.GET("/:uid", s.getReservationByUid, app.GetUsernameMW())
-	reservations.DELETE("/:uid", s.canceledReservations, app.GetUsernameMW())
+	reservations.GET("", s.getAllReservationsByUser)
+	reservations.POST("", s.createReservation)
+	reservations.GET("/:uid", s.getReservationByUid)
+	reservations.DELETE("/:uid", s.canceledReservations)
 
 	return s
 }

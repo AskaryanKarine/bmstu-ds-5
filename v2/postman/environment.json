@@ -9,27 +9,27 @@
     },
     {
       "key": "identityProviderUrl",
-      "value": "",
+      "value": "http://helpme.ds-labs.tw1.ru/realms/rsoi/protocol/openid-connect/token",
       "enabled": true
     },
     {
       "key": "username",
-      "value": "",
+      "value": "username",
       "enabled": true
     },
     {
       "key": "password",
-      "value": "",
+      "value": "password",
       "enabled": true
     },
     {
       "key": "clientId",
-      "value": "",
+      "value": "backend-rsoi",
       "enabled": true
     },
     {
       "key": "clientSecret",
-      "value": "",
+      "value": "FjMX1dRxrnwbT9HJF8Wzo8xIc0X9061Y",
       "enabled": true
     }
   ],

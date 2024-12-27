@@ -23,7 +23,7 @@ func main() {
 
 	hr := repository.NewHotelStorage(db)
 	rr := repository.NewReservationStorage(db)
-	s := server.New(hr, rr)
+	s := server.New(hr, rr, cfg)
 
 	s.Run(cfg.Port)
 }

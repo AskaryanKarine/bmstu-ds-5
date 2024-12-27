@@ -22,7 +22,7 @@ func main() {
 	}
 
 	lr := repository.NewStorage(db)
-	s := server.NewServer(lr)
+	s := server.NewServer(lr, cfg)
 
 	s.Run(cfg.Port)
 }

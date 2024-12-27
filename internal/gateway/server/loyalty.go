@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) getLoyalty(c echo.Context) error {
-	username, ok := c.Get("username").(string)
+	username, ok := c.Get("token").(string)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get username"})
 	}

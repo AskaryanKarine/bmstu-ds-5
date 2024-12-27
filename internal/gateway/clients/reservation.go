@@ -23,13 +23,13 @@ func NewReservationClient(client httpClient, baseUrl string) *ReservationClient 
 	}
 }
 
-func (r *ReservationClient) GetReservationByUUID(username, uuid string) (models.ExtendedReservationResponse, error) {
+func (r *ReservationClient) GetReservationByUUID(token, uuid string) (models.ExtendedReservationResponse, error) {
 	urlReq := fmt.Sprintf("%s/%s/%s", r.baseUrl, "reservations", uuid)
 	req, err := http.NewRequest(http.MethodGet, urlReq, nil)
 	if err != nil {
 		return models.ExtendedReservationResponse{}, fmt.Errorf("failed to build request: %w", err)
 	}
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
@@ -68,13 +68,13 @@ func (r *ReservationClient) GetReservationByUUID(username, uuid string) (models.
 	}
 }
 
-func (r *ReservationClient) GetReservationsByUser(username string) ([]models.ExtendedReservationResponse, error) {
+func (r *ReservationClient) GetReservationsByUser(token string) ([]models.ExtendedReservationResponse, error) {
 	urlReq := fmt.Sprintf("%s/%s", r.baseUrl, "reservations")
 	req, err := http.NewRequest(http.MethodGet, urlReq, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build request: %w", err)
 	}
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
@@ -112,13 +112,13 @@ func (r *ReservationClient) GetReservationsByUser(username string) ([]models.Ext
 	}
 }
 
-func (r *ReservationClient) CancelReservation(username, uuid string) error {
+func (r *ReservationClient) CancelReservation(token, uuid string) error {
 	urlReq := fmt.Sprintf("%s/%s/%s", r.baseUrl, "reservations", uuid)
 	req, err := http.NewRequest(http.MethodDelete, urlReq, nil)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
@@ -150,7 +150,7 @@ func (r *ReservationClient) CancelReservation(username, uuid string) error {
 	}
 }
 
-func (r *ReservationClient) GetHotels(page, size int) (models.PaginationResponse, error) {
+func (r *ReservationClient) GetHotels(page, size int, token string) (models.PaginationResponse, error) {
 	params := url.Values{}
 	params.Add("page", strconv.Itoa(page))
 	params.Add("size", strconv.Itoa(size))
@@ -159,6 +159,7 @@ func (r *ReservationClient) GetHotels(page, size int) (models.PaginationResponse
 	if err != nil {
 		return models.PaginationResponse{}, fmt.Errorf("failed to build request: %w", err)
 	}
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
@@ -202,12 +203,13 @@ func (r *ReservationClient) GetHotels(page, size int) (models.PaginationResponse
 
 }
 
-func (r *ReservationClient) GetHotelByUUID(uuid string) (models.HotelResponse, error) {
+func (r *ReservationClient) GetHotelByUUID(uuid, token string) (models.HotelResponse, error) {
 	urlReq := fmt.Sprintf("%s/%s/%s", r.baseUrl, "hotels", uuid)
 	req, err := http.NewRequest(http.MethodGet, urlReq, nil)
 	if err != nil {
 		return models.HotelResponse{}, fmt.Errorf("failed to build request: %w", err)
 	}
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
@@ -244,7 +246,7 @@ func (r *ReservationClient) GetHotelByUUID(uuid string) (models.HotelResponse, e
 	}
 }
 
-func (r *ReservationClient) CreateReservation(model models.ExtendedCreateReservationResponse, username string) (string, error) {
+func (r *ReservationClient) CreateReservation(model models.ExtendedCreateReservationResponse, token string) (string, error) {
 	urlReq := fmt.Sprintf("%s/%s", r.baseUrl, "reservations")
 	reqBody, err := json.Marshal(model)
 	if err != nil {
@@ -254,7 +256,7 @@ func (r *ReservationClient) CreateReservation(model models.ExtendedCreateReserva
 	if err != nil {
 		return "", fmt.Errorf("failed to build request: %w", err)
 	}
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := r.client.Do(req)

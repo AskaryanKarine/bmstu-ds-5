@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/AskaryanKarine/bmstu-ds-4/pkg/app"
+	"github.com/AskaryanKarine/bmstu-ds-4/pkg/config"
 	"github.com/AskaryanKarine/bmstu-ds-4/pkg/models"
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +20,7 @@ type paymentStorage interface {
 	Create(ctx context.Context, payment models.PaymentInfo) (string, error)
 }
 
-func NewServer(ps paymentStorage) *Server {
+func NewServer(ps paymentStorage, cfg config.Config) *Server {
 	e := echo.New()
 	s := &Server{
 		echo: e,
@@ -29,7 +30,7 @@ func NewServer(ps paymentStorage) *Server {
 	app.SetStandardSetting(e)
 	app.AddHealthCheck(e)
 
-	api := s.echo.Group("/api/v1")
+	api := s.echo.Group("/api/v1", app.GetUsernameMW(cfg.JWKsURl))
 
 	api.GET("/payments/:uid", s.getPaymentInfo)
 	api.POST("/payments", s.CreatePayment)

@@ -7,26 +7,26 @@ import (
 )
 
 func (s *Server) getUserInfo(c echo.Context) error {
-	username, ok := c.Get("username").(string)
+	token, ok := c.Get("token").(string)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get username"})
+		return c.JSON(http.StatusBadRequest, models.ErrorResponse{Message: "failed to get token"})
 	}
 
-	reservationsByUser, err := s.reservation.GetReservationsByUser(username)
+	reservationsByUser, err := s.reservation.GetReservationsByUser(token)
 	if err != nil {
 		return processError(c, err)
 	}
 
 	reservationsResp := make([]models.ReservationResponse, 0, len(reservationsByUser))
 	for i := range reservationsByUser {
-		paymentInfo, err := s.payment.GetByUUID(reservationsByUser[i].PaymentUID)
+		paymentInfo, err := s.payment.GetByUUID(reservationsByUser[i].PaymentUID, token)
 		if err != nil {
 			return processError(c, err)
 		}
 		reservationsByUser[i].Payment = paymentInfo
 		reservationsResp = append(reservationsResp, reservationsByUser[i].ReservationResponse)
 	}
-	loyaltyResp, err := s.loyalty.GetLoyaltyByUser(username)
+	loyaltyResp, err := s.loyalty.GetLoyaltyByUser(token)
 	if err != nil {
 		return processError(c, err)
 	}

@@ -24,14 +24,14 @@ func NewLoyaltyClient(client httpClient, baseUrl string) *LoyaltyClient {
 	}
 }
 
-func (l *LoyaltyClient) GetLoyaltyByUser(username string) (models.LoyaltyInfoResponse, error) {
+func (l *LoyaltyClient) GetLoyaltyByUser(token string) (models.LoyaltyInfoResponse, error) {
 	urlReq := fmt.Sprintf("%s/%s", l.baseUrl, "loyalty")
 	req, err := http.NewRequest(http.MethodGet, urlReq, nil)
 	if err != nil {
 		return models.LoyaltyInfoResponse{}, fmt.Errorf("failed to build request: %w", err)
 	}
 
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 	resp, err := l.client.Do(req)
 	if err != nil {
 		return models.LoyaltyInfoResponse{}, fmt.Errorf("failed to make request: %w", err)
@@ -69,14 +69,14 @@ func (l *LoyaltyClient) GetLoyaltyByUser(username string) (models.LoyaltyInfoRes
 	}
 }
 
-func (l *LoyaltyClient) DecreaseLoyalty(username string) error {
+func (l *LoyaltyClient) DecreaseLoyalty(token string) error {
 	urlReq := fmt.Sprintf("%s/%s", l.baseUrl, "reservations/decrease")
 	req, err := http.NewRequest(http.MethodDelete, urlReq, nil)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 	resp, err := l.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to make request: %w", err)
@@ -109,14 +109,14 @@ func (l *LoyaltyClient) DecreaseLoyalty(username string) error {
 	}
 }
 
-func (l *LoyaltyClient) IncreaseLoyalty(username string) error {
+func (l *LoyaltyClient) IncreaseLoyalty(token string) error {
 	urlReq := fmt.Sprintf("%s/%s", l.baseUrl, "reservations/increase")
 	req, err := http.NewRequest(http.MethodPost, urlReq, nil)
 	if err != nil {
 		return fmt.Errorf("failed to build request: %w", err)
 	}
 
-	req.Header.Set("X-User-Name", username)
+	req.Header.Set("Authorization", "Bearer "+token)
 	resp, err := l.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to make request: %w", err)

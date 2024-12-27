@@ -1,12 +1,14 @@
 package app
 
 import (
-	"github.com/AskaryanKarine/bmstu-ds-4/pkg/models"
+	"context"
+	"fmt"
 	"github.com/AskaryanKarine/bmstu-ds-4/pkg/validation"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
+	"strings"
 )
 
 func SetStandardSetting(e *echo.Echo) {
@@ -20,18 +22,34 @@ func SetStandardSetting(e *echo.Echo) {
 	e.Validator = validation.MustRegisterCustomValidator(validator.New())
 }
 
-func GetUsernameMW() func(next echo.HandlerFunc) echo.HandlerFunc {
+func GetUsernameMW(jwksURL string) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			username := c.Request().Header.Get("X-User-Name")
-			if username == "" {
-				return c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-					Message: "failed to get X-User-Name header",
-				})
-
+			header := c.Request().Header.Get("Authorization")
+			if header == "" {
+				return c.NoContent(http.StatusUnauthorized)
 			}
+
+			prefix := "Bearer "
+			if !strings.HasPrefix(header, prefix) {
+				return c.NoContent(http.StatusUnauthorized)
+			}
+
+			token := strings.TrimPrefix(header, prefix)
+
+			username, err := parseToken(token, jwksURL)
+			fmt.Println(username, err)
+			if err != nil {
+				return c.NoContent(http.StatusUnauthorized)
+			}
+
 			c.Set("username", username)
+			c.Set("token", token)
 			return next(c)
 		}
 	}
+}
+
+func GetToken(ctx context.Context) string {
+	return ""
 }
