@@ -22,7 +22,8 @@ func TestPaymentClient_Cancel(t *testing.T) {
 		baseUrl string
 	}
 	type args struct {
-		uuid string
+		uuid  string
+		token string
 	}
 	tests := []struct {
 		name    string
@@ -40,7 +41,8 @@ func TestPaymentClient_Cancel(t *testing.T) {
 				baseUrl: "http://localhost/payments/cancel",
 			},
 			args: args{
-				uuid: "test",
+				uuid:  "test",
+				token: "test",
 			},
 			wantErr: false,
 		},
@@ -51,7 +53,7 @@ func TestPaymentClient_Cancel(t *testing.T) {
 				client:  tt.fields.client,
 				baseUrl: tt.fields.baseUrl,
 			}
-			if err := p.Cancel(tt.args.uuid); (err != nil) != tt.wantErr {
+			if err := p.Cancel(tt.args.uuid, tt.args.token); (err != nil) != tt.wantErr {
 				t.Errorf("Cancel() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
