@@ -1,0 +1,20 @@
+name: payment
+namespace: default
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/askaryankarine/bmstu-ds-4/payment
+  tag: "latest"
+
+postgres:
+  dsn: ""
+
+app:
+  port: 80
+  env: "prod"
+
+gateway:
+  reservation: ""
+  loyalty: ""
+  payment: ""

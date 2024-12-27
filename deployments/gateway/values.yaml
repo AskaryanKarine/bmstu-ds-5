@@ -1,0 +1,20 @@
+name: gateway
+namespace: default
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/askaryankarine/bmstu-ds-4/gateway
+  tag: "latest"
+
+postgres:
+  dsn: ""
+
+app:
+  port: 80
+  env: "prod"
+
+gateway:
+  reservation: "http://194.87.86.112/default/reservation/api/v1"
+  loyalty: "http://194.87.86.112/default/loyalty/api/v1"
+  payment: "http://194.87.86.112/default/payment/api/v1"

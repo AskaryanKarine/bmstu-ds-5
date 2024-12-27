@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "helm.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: service
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          command:
+            - ./go/main
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_DSN
+              value: {{ quote .Values.postgres.dsn }}
+            - name: PORT
+              value: {{ quote .Values.app.port }}
+            - name: APP_ENV
+              value: {{ quote .Values.app.env }}
+            - name: RESERVATION_SERVICE
+              value: {{ quote .Values.gateway.reservation }}
+            - name: PAYMENT_SERVICE
+              value: {{ quote .Values.gateway.payment }}
+            - name: LOYALTY_SERVICE
+              value: {{ quote .Values.gateway.loyalty }}
