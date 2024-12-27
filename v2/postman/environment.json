@@ -4,7 +4,7 @@
   "values": [
     {
       "key": "serviceUrl",
-      "value": "",
+      "value": "http://194.87.86.112/default/gateway",
       "enabled": true
     },
     {
