@@ -34,3 +34,5 @@ spec:
               value: {{ quote .Values.gateway.payment }}
             - name: LOYALTY_SERVICE
               value: {{ quote .Values.gateway.loyalty }}
+            - name: JWK_URL
+              value: {{ quote .Values.app.jwk_url }}

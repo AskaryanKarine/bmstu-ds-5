@@ -13,6 +13,7 @@ postgres:
 app:
   port: 80
   env: "prod"
+  jwk_url: http://helpme.ds-labs.tw1.ru/realms/rsoi/protocol/openid-connect/certs
 
 gateway:
   reservation: "http://194.87.86.112/default/reservation/api/v1"
