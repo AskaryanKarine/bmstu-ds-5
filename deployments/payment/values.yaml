@@ -4,7 +4,7 @@ namespace: default
 replicaCount: 1
 
 image:
-  repository: ghcr.io/askaryankarine/bmstu-ds-4/payment
+  repository: ghcr.io/askaryankarine/bmstu-ds-5/payment
   tag: "latest"
 
 postgres:

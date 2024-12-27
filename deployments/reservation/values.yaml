@@ -4,7 +4,7 @@ namespace: default
 replicaCount: 1
 
 image:
-  repository: ghcr.io/askaryankarine/bmstu-ds-4/reservation
+  repository: ghcr.io/askaryankarine/bmstu-ds-5/reservation
   tag: "latest"
 
 postgres:
